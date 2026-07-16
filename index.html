@@ -655,6 +655,17 @@ function finishSession(){
   return summary;
 }
 
+/* Escape hatch: if a session got left in progress (crashed browser, testing,
+   changed your mind) there was previously no way out of it -- every other
+   day's "Start"/"Do it again" button just silently disabled itself. This
+   clears it without logging anything, so nothing counts as done. */
+function discardCurrentSession(){
+  if(!state.current) return false;
+  state.current = null;
+  save();
+  return true;
+}
+
 /* first not-yet-done day in the current cycle, in rotation order -- what "Today" defaults to */
 function nextCycleDay(){
   for(var i=0;i<ROTATION.length;i++){ if(!state.cycleCompleted[ROTATION[i]]) return ROTATION[i]; }
@@ -1077,7 +1088,8 @@ function renderCalendar(){
 
   if(state.current){
     html += '<div class="card framedcard warnframe"><p class="exmeta">You have an in-progress session — <b>'+state.current.label+'</b>. Finish or resume it before starting another.</p>';
-    html += '<button class="primary" style="width:100%;margin-top:8px;" data-nav="today">Go to today\'s session →</button></div>';
+    html += '<button class="primary" style="width:100%;margin-top:8px;" data-nav="today">Go to today\'s session →</button>';
+    html += '<button style="width:100%;margin-top:8px;" id="discardSessionBtn">Discard it instead (nothing gets logged)</button></div>';
   }
 
   ROTATION.forEach(function(dayKey){
@@ -1107,6 +1119,14 @@ function renderCalendar(){
       var started = startSession(btn.getAttribute('data-start'));
       if(started){ state.view = 'today'; render(); }
     });
+  });
+
+  var discardBtn = document.getElementById('discardSessionBtn');
+  if(discardBtn) discardBtn.addEventListener('click', function(){
+    if(confirm("Discard the in-progress session? Nothing from it will be logged, and this can't be undone.")){
+      discardCurrentSession();
+      render();
+    }
   });
 }
 
@@ -1279,6 +1299,10 @@ function renderSettings(){
 
   html += '<div class="card"><h2>Data</h2>';
   html += '<div class="row" style="margin-bottom:8px;"><span class="text2">Sessions logged</span><span>'+state.history.length+'</span></div>';
+  if(state.current){
+    html += '<div class="row" style="margin-bottom:8px;"><span class="text2">In-progress session</span><span class="badge warn">'+esc(state.current.label)+'</span></div>';
+    html += '<button style="width:100%;margin-bottom:8px;" id="discardSessionBtnSettings">Discard in-progress session</button>';
+  }
   html += '<button style="width:100%;margin-bottom:8px;" id="exportBtn">Export backup (JSON)</button>';
   html += '<button style="width:100%;margin-bottom:8px;" id="importBtn">Import backup</button>';
   html += '<input type="file" id="importFile" accept="application/json" style="display:none;">';
@@ -1361,6 +1385,14 @@ function renderSettings(){
       }catch(err){ alert("That file could not be read as a valid backup."); }
     };
     reader.readAsText(file);
+  });
+
+  var discardBtnSettings = document.getElementById('discardSessionBtnSettings');
+  if(discardBtnSettings) discardBtnSettings.addEventListener('click', function(){
+    if(confirm("Discard the in-progress session? Nothing from it will be logged, and this can't be undone.")){
+      discardCurrentSession();
+      render();
+    }
   });
 
   document.getElementById('resetBtn').addEventListener('click', function(){
