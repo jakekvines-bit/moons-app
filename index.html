@@ -155,6 +155,11 @@ var storage = {
    real session automatically -- no email, no click-through, no typing. */
 var pendingDeviceLink = null;
 
+/* Which day's full workout is currently being previewed from the Calendar,
+   without actually starting it. Local to this page load on purpose -- it's
+   just a look, not something that needs to sync or persist. */
+var previewDayKey = null;
+
 function deviceLinkParamToken(){
   try{
     var u = new URL(window.location.href);
@@ -687,6 +692,7 @@ function render(){
     if(!currentUser){ renderAuthScreen(); return; }
     if(!state){ renderLoading(); return; }
     if(pendingDeviceLink){ renderDeviceLinkPrompt(); return; }
+    if(previewDayKey){ renderDayPreview(previewDayKey); return; }
     if(!state.onboarded) renderOnboarding();
     else if(state.view==="today") renderToday();
     else if(state.view==="calendar") renderCalendar();
@@ -1083,6 +1089,78 @@ function renderToday(){
   }
 }
 
+/* Read-only look at a full day's workout -- same exercise-picking logic as
+   actually starting it, but nothing gets saved to state.current, so you can
+   check what a day involves before committing to it. */
+function renderDayPreview(dayKey){
+  var tpl = dayKey === "D" ? buildBonusDay() : TEMPLATES[dayKey];
+  var used = [];
+  var groups = tpl.slots.map(function(slot){
+    if(slot.type === "superset"){
+      return {type:"superset", restBetween:slot.restBetween, restAfterRound:slot.restAfterRound,
+        items: slot.parts.map(function(part){ return buildSessionExercise(part.pattern, part.role, used); })};
+    }
+    var item = buildSessionExercise(slot.pattern, slot.role, used);
+    return {type:"single", rest: EX[item.exId].rest, item:item};
+  });
+  var condId = pickConditioning(tpl.cond, state.profile);
+
+  var html = '<div class="topbar"><h1>'+tpl.label+'</h1><p class="muted">Preview — nothing is logged until you start it</p></div>';
+
+  function previewBlock(e, pairLabel){
+    var ex = EX[e.exId];
+    var block = pairLabel
+      ? '<div style="display:flex;gap:8px;align-items:center;margin-bottom:2px;"><span class="pairbadge">'+pairLabel+'</span><div class="exname">'+ex.name+'</div></div>'
+      : '<div class="exname">'+ex.name+'</div>';
+    block += '<div class="exmeta">'+ex.equipLabel+' · target '+(ex.hasWeight? e.targetWeight+' lb x ':'')+e.targetReps+(ex.isTime?'s':' reps')+(ex.perSide?' /side':'')+' · '+ex.sets+' sets</div>';
+    if(ex.tempo) block += '<div class="exmeta">Tempo '+ex.tempo+' (down–pause–up)</div>';
+    if(ex.note) block += '<div class="exmeta">'+ex.note+'</div>';
+    block += '<div style="margin-top:4px;"><a class="link" href="'+correctFormUrl(ex)+'" target="_blank" rel="noopener">Correct form</a></div>';
+    return block;
+  }
+
+  var supersetCounter = 0;
+  groups.forEach(function(g){
+    if(g.type === "single"){
+      html += '<div class="card framedcard">';
+      html += previewBlock(g.item);
+      html += '<div class="exmeta" style="margin-top:6px;">Rest '+g.rest+'s after</div>';
+      html += '</div>';
+    } else {
+      supersetCounter++;
+      html += '<div class="card framedcard warnframe"><span class="badge warn">Superset</span>';
+      g.items.forEach(function(it, ii){
+        var pairLabel = supersetCounter + String.fromCharCode(65+ii);
+        html += '<div style="margin-top:10px;">'+previewBlock(it, pairLabel)+'</div>';
+      });
+      html += '<div class="exmeta" style="margin-top:6px;">Rest '+g.restBetween+'s between exercises, '+g.restAfterRound+'s after a full round</div>';
+      html += '</div>';
+    }
+  });
+
+  html += '<div class="card framedcard"><div class="exname">Conditioning finisher</div><p class="exmeta">'+CONDITIONING_POOL[condId].name+' — '+conditioningDesc(condId, state.conditioningTier)+'</p></div>';
+
+  html += '<div style="display:flex;gap:8px;margin-top:4px;">';
+  html += '<button style="flex:1;" id="previewBackBtn">← Back to Calendar</button>';
+  html += '<button class="primary" style="flex:1;" data-start="'+dayKey+'"'+(state.current?' disabled':'')+'>Start this day</button>';
+  html += '</div>';
+  if(state.current) html += '<p class="muted" style="margin-top:8px;">You have a different session in progress — finish or discard it first to start this one.</p>';
+
+  html += '<div style="height:30px;"></div>';
+  app.innerHTML = html;
+
+  var backBtn = document.getElementById('previewBackBtn');
+  if(backBtn) backBtn.addEventListener('click', function(){ previewDayKey = null; render(); });
+
+  app.querySelectorAll('[data-start]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(state.current) return;
+      var started = startSession(btn.getAttribute('data-start'));
+      if(started){ previewDayKey = null; state.view = 'today'; render(); }
+    });
+  });
+}
+
 function renderCalendar(){
   var html = '<div class="topbar"><h1>Calendar</h1><p class="muted">This cycle\'s workouts</p></div>';
 
@@ -1098,6 +1176,7 @@ function renderCalendar(){
     html += '<div class="card framedcard'+(done?'':' warnframe')+'">';
     html += '<div class="row"><h2>'+tpl.label+'</h2><span class="badge'+(done?'':' warn')+'">'+(done?'Done':'Day '+dayKey)+'</span></div>';
     html += '<p class="exmeta">'+previewNames(tpl).join(' · ')+'</p>';
+    html += '<a class="link" href="#" data-view="'+dayKey+'" style="display:inline-block;margin-top:6px;">View full workout →</a>';
     html += '<button class="'+(done?'':'primary')+'" style="width:100%;margin-top:10px;" data-start="'+dayKey+'"'+(state.current?' disabled':'')+'>'+(done?'Do it again':'Start this day')+'</button>';
     html += '</div>';
   });
@@ -1105,6 +1184,7 @@ function renderCalendar(){
   html += '<div class="card framedcard">';
   html += '<div class="row"><h2>Bonus day</h2><span class="badge">Optional</span></div>';
   html += '<p class="exmeta">Adapts to whatever\'s been undertrained in your last few sessions.</p>';
+  html += '<a class="link" href="#" data-view="D" style="display:inline-block;margin-top:6px;">View full workout →</a>';
   html += '<button style="width:100%;margin-top:10px;" data-start="D"'+(state.current?' disabled':'')+'>Start bonus day</button>';
   html += '</div>';
 
@@ -1112,6 +1192,14 @@ function renderCalendar(){
   html += navHtml();
   app.innerHTML = html;
   wireNav();
+
+  app.querySelectorAll('[data-view]').forEach(function(link){
+    link.addEventListener('click', function(e){
+      if(e && e.preventDefault) e.preventDefault();
+      previewDayKey = link.getAttribute('data-view');
+      render();
+    });
+  });
 
   app.querySelectorAll('[data-start]').forEach(function(btn){
     btn.addEventListener('click', function(){
