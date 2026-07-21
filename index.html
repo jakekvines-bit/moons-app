@@ -333,6 +333,118 @@ var CONDITIONING_PREFS = {
   D: ["plyoBoxFinisher","medBallSlamFinisher","treadmillIntervals","battleRopeWaves","bodyweightCircuit"]
 };
 
+/* ---------------- warmup + cooldown ---------------- */
+/* Buckets the movement patterns used in a slot down to a body-region bucket,
+   so the warmup/stretch pick can be tailored to whatever's actually getting
+   trained that day without needing a separate mapping per exercise. */
+var PATTERN_BUCKET = {
+  squat:"lowerBody", hinge:"lowerBody",
+  horizontalPushFlat:"upperPush", horizontalPushIncline:"upperPush", verticalPush:"upperPush",
+  horizontalPull:"upperPull", verticalPull:"upperPull",
+  core:"core"
+};
+
+function bucketsForTemplate(tpl){
+  var seen = {};
+  tpl.slots.forEach(function(slot){
+    var parts = slot.type==="superset" ? slot.parts : [slot];
+    parts.forEach(function(p){
+      var b = PATTERN_BUCKET[p.pattern];
+      if(b) seen[b] = true;
+    });
+  });
+  return Object.keys(seen);
+}
+
+/* Same idea, but from the actual exercises picked for a live session --
+   covers the case where we only have cur.groups (concrete exIds) and not
+   the original template (e.g. a bonus day, which is generated on the fly). */
+function bucketsForExIds(exIds){
+  var seen = {};
+  exIds.forEach(function(id){
+    var ex = EX[id];
+    var b = ex && PATTERN_BUCKET[ex.pattern];
+    if(b) seen[b] = true;
+  });
+  return Object.keys(seen);
+}
+
+var WARMUP_POOL = {
+  general: [
+    {name:"Light cardio — jump rope, jog in place, or an easy bike spin", duration:90, note:"Just enough to break a light sweat before anything else."},
+    {name:"Arm circles + leg swings", duration:60, note:"10 each direction, each side — wakes up the shoulders and hips."}
+  ],
+  lowerBody: [
+    {name:"Bodyweight squats", duration:45, note:"Slow and controlled through whatever range feels clean."},
+    {name:"Walking lunges or front-to-back leg swings", duration:45, note:"10 per side."}
+  ],
+  upperPush: [
+    {name:"Wall slides or scapular push-ups", duration:45, note:"Wakes up the shoulder blades before pressing."},
+    {name:"Band pull-aparts or shoulder dislocates", duration:45, note:"Light band, high reps — primes the shoulders."}
+  ],
+  upperPull: [
+    {name:"Band pull-aparts", duration:45, note:"High reps, light tension — primes the upper back."},
+    {name:"Dead hangs or scap pull-ups", duration:45, note:"If you've got a bar — wakes up the lats and grip."}
+  ],
+  core: [
+    {name:"Cat-cow + dead bug", duration:45, note:"Mobilizes the spine before loading the core."}
+  ]
+};
+
+var STRETCH_POOL = {
+  general: [
+    {name:"World's greatest stretch", duration:60, note:"60s per side — hips, hamstrings, and thoracic spine in one move."},
+    {name:"Couch stretch", duration:60, note:"60s per side — one of the best long-term investments for hip flexor length."}
+  ],
+  lowerBody: [
+    {name:"Pigeon stretch (a.k.a. the \"perfect stretch\")", duration:60, note:"60s per side — deep hip opener, ease in, never into pain."},
+    {name:"Standing hamstring stretch or forward fold", duration:45, note:"Soft knees, let gravity do the work."}
+  ],
+  upperPush: [
+    {name:"Doorway chest stretch", duration:45, note:"45s per side — opens the front of the shoulder after pressing."}
+  ],
+  upperPull: [
+    {name:"Child's pose reach + lat stretch", duration:45, note:"45s per side — releases the lats and upper back after pulling."}
+  ],
+  core: [
+    {name:"Plank hold", duration:30, note:"30–45s — reinforces the bracing you used all session."}
+  ]
+};
+
+function itemsForBuckets(pool, buckets){
+  var items = pool.general.slice();
+  buckets.forEach(function(b){ if(pool[b]) items = items.concat(pool[b]); });
+  return items;
+}
+
+function totalDuration(items){
+  return items.reduce(function(sum, it){ return sum + (it.duration||0); }, 0);
+}
+
+function warmupHtml(buckets){
+  var items = itemsForBuckets(WARMUP_POOL, buckets);
+  var mins = Math.round(totalDuration(items)/60);
+  var html = '<div class="card framedcard"><h2>Warmup (~'+(mins<1?1:mins)+' min)</h2>';
+  items.forEach(function(it){
+    html += '<div style="margin-top:8px;"><div class="exname" style="font-size:14px;">'+it.name+'</div>';
+    html += '<p class="exmeta">'+it.duration+'s — '+it.note+'</p></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function stretchHtml(buckets){
+  var items = itemsForBuckets(STRETCH_POOL, buckets);
+  var mins = Math.round(totalDuration(items)/60);
+  var html = '<div class="card framedcard"><h2>Cooldown stretches (~'+(mins<1?1:mins)+' min)</h2>';
+  items.forEach(function(it){
+    html += '<div style="margin-top:8px;"><div class="exname" style="font-size:14px;">'+it.name+'</div>';
+    html += '<p class="exmeta">'+it.duration+'s — '+it.note+'</p></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 var TEMPLATES = {
   A: {label:"Full body I — squat & push", cond:"A", slots:[
     {type:"single", pattern:"squat", role:"main"},
@@ -407,6 +519,10 @@ function normalizeState(){
   /* discard an in-progress session saved by an older version of this file (data shape changed) */
   if(state.current && !Array.isArray(state.current.groups)) state.current = null;
   if(state.current && typeof state.current.conditioningRating === "undefined") state.current.conditioningRating = null;
+  state.history.forEach(function(h){
+    if(typeof h.difficultyRating === "undefined") h.difficultyRating = null;
+    if(typeof h.difficultyRatingMsg === "undefined") h.difficultyRatingMsg = null;
+  });
   if(state.view === "summary" && !state._lastSummary) state.view = "today";
 }
 
@@ -640,15 +756,19 @@ function finishSession(){
     var note = updateProgress(e.exId, e.sets);
     summary.exercises.push({exId:e.exId, name:EX[e.exId].name, sets:loggedSets, note:note});
   });
-  state.history.push({
+  var historyEntry = {
     id: Date.now(),
     date: new Date().toISOString().slice(0,10),
     dayKey: cur.dayKey,
     label: cur.label,
     exercises: flat.map(function(e){ return {exId:e.exId, sets:e.sets.filter(function(s){return s.reps>0;})}; }),
     totalVolume: summary.totalVolume,
-    totalSets: summary.totalSets
-  });
+    totalSets: summary.totalSets,
+    difficultyRating: null,
+    difficultyRatingMsg: null
+  };
+  state.history.push(historyEntry);
+  summary.historyId = historyEntry.id;
   if(!cur.isBonus && ROTATION.indexOf(cur.dayKey)>=0){
     state.cycleCompleted[cur.dayKey] = true;
     if(ROTATION.every(function(k){ return state.cycleCompleted[k]; })){
@@ -658,6 +778,40 @@ function finishSession(){
   state.current = null;
   save();
   return summary;
+}
+
+/* Separate from the conditioning-finisher rating -- this covers the whole
+   session (the main lifts) and, on "too easy", applies an extra progression
+   bump on top of whatever the normal set-by-set logic already did, so
+   difficulty can catch up faster than waiting on rep-range thresholds alone. */
+function rateSessionDifficulty(historyId, rating){
+  var entry = null;
+  for(var i=0;i<state.history.length;i++){ if(state.history[i].id===historyId){ entry = state.history[i]; break; } }
+  if(!entry || entry.difficultyRating) return null; /* already rated, or not found -- no-op */
+  entry.difficultyRating = rating;
+  var bumped = [];
+  if(rating==="easy" || rating==="hard"){
+    entry.exercises.forEach(function(e){
+      var ex = EX[e.exId];
+      if(!ex) return;
+      var p = getProgress(e.exId);
+      if(rating==="easy"){
+        if(ex.hasWeight) p.weight = p.weight + ex.increment;
+        else p.repTarget = Math.min(p.repTarget+1, ex.repHigh);
+      } else {
+        if(ex.hasWeight) p.weight = Math.max(0, p.weight - ex.increment);
+        else p.repTarget = Math.max(ex.repLow, p.repTarget-1);
+      }
+      bumped.push(ex.name);
+    });
+  }
+  var msg;
+  if(rating==="easy") msg = "Bumped next time's target up a bit further on: "+bumped.join(", ")+".";
+  else if(rating==="hard") msg = "Eased next time's target back a bit on: "+bumped.join(", ")+".";
+  else msg = "Got it — keeping next time's targets where they are.";
+  entry.difficultyRatingMsg = msg;
+  save();
+  return msg;
 }
 
 /* Escape hatch: if a session got left in progress (crashed browser, testing,
@@ -919,6 +1073,7 @@ function renderToday(){
     html += '<p class="exmeta">'+previewNames(tpl).join(' · ')+'</p>';
     var previewCondId = pickConditioning(tpl.cond, state.profile);
     html += '<p class="exmeta">Finisher: '+CONDITIONING_POOL[previewCondId].name+' — '+conditioningDesc(previewCondId, state.conditioningTier)+'</p>';
+    html += '<p class="exmeta">Includes a tailored warmup and cooldown stretches, start to finish.</p>';
     html += '<button class="primary" style="width:100%;margin-top:12px;" data-start="'+nextKey+'">Start session</button>';
     html += '</div>';
     html += '<button class="ghost" data-start="D">Do a bonus 4th day instead →</button>';
@@ -926,6 +1081,10 @@ function renderToday(){
   } else {
     var cur = state.current;
     html += '<div class="card framedcard'+(cur.isBonus?' warnframe':'')+'"><div class="row"><h2>'+cur.label+'</h2><span class="badge'+(cur.isBonus?' warn':'')+'">'+(cur.isBonus?'Bonus':'Day '+cur.dayKey)+'</span></div></div>';
+
+    var curExIds = flattenGroups(cur.groups).map(function(e){ return e.exId; });
+    var curBuckets = bucketsForExIds(curExIds);
+    html += warmupHtml(curBuckets);
 
     function exerciseBlock(e, gi, ii, pairLabel){
       var ex = EX[e.exId];
@@ -990,6 +1149,8 @@ function renderToday(){
       html += '<p class="exmeta" id="rateStatus" style="margin-top:6px;"></p>';
     }
     html += '</div>';
+
+    html += stretchHtml(curBuckets);
 
     html += '<div class="card framedcard"><h2>How did this one go?</h2>';
     html += '<p class="muted" style="margin-bottom:8px;">Too easy, too hard, aggravated something, hated an exercise — say so here. It\'s tagged to this specific workout and goes straight to Jake.</p>';
@@ -1104,8 +1265,10 @@ function renderDayPreview(dayKey){
     return {type:"single", rest: EX[item.exId].rest, item:item};
   });
   var condId = pickConditioning(tpl.cond, state.profile);
+  var previewBuckets = bucketsForTemplate(tpl);
 
   var html = '<div class="topbar"><h1>'+tpl.label+'</h1><p class="muted">Preview — nothing is logged until you start it</p></div>';
+  html += warmupHtml(previewBuckets);
 
   function previewBlock(e, pairLabel){
     var ex = EX[e.exId];
@@ -1139,6 +1302,8 @@ function renderDayPreview(dayKey){
   });
 
   html += '<div class="card framedcard"><div class="exname">Conditioning finisher</div><p class="exmeta">'+CONDITIONING_POOL[condId].name+' — '+conditioningDesc(condId, state.conditioningTier)+'</p></div>';
+
+  html += stretchHtml(previewBuckets);
 
   html += '<div style="display:flex;gap:8px;margin-top:4px;">';
   html += '<button style="flex:1;" id="previewBackBtn">← Back to Calendar</button>';
@@ -1239,11 +1404,40 @@ function renderSummary(){
     i++;
   });
   html += '</div>';
+
+  var histEntry = null;
+  if(s.historyId){
+    for(var hi=0;hi<state.history.length;hi++){ if(state.history[hi].id===s.historyId){ histEntry = state.history[hi]; break; } }
+  }
+  if(histEntry){
+    html += '<div class="card framedcard"><h2>How did the whole session feel?</h2>';
+    html += '<p class="muted" style="margin-bottom:8px;">This is about the lifts overall, separate from the finisher rating. "Too easy" bumps next time\'s weight/reps up a bit further, on top of the normal progression.</p>';
+    if(histEntry.difficultyRating){
+      html += '<p class="exmeta" style="color:var(--accent);">You rated this: '+(histEntry.difficultyRating==="easy"?"Too easy":histEntry.difficultyRating==="hard"?"Too hard":"Just right")+'</p>';
+      if(histEntry.difficultyRatingMsg) html += '<p class="exmeta" style="margin-top:2px;">'+histEntry.difficultyRatingMsg+'</p>';
+    } else {
+      html += '<div style="display:flex;gap:8px;">';
+      html += '<button style="flex:1;" data-session-rate="easy">Too easy</button>';
+      html += '<button style="flex:1;" data-session-rate="right">Just right</button>';
+      html += '<button style="flex:1;" data-session-rate="hard">Too hard</button>';
+      html += '</div>';
+      html += '<p class="exmeta" id="sessionRateStatus" style="margin-top:6px;"></p>';
+    }
+    html += '</div>';
+  }
+
   html += '<button class="primary" style="width:100%;margin-top:8px;" id="backToday">Done</button>';
   html += navHtml();
   app.innerHTML = html;
   wireNav();
   document.getElementById('backToday').addEventListener('click', function(){ state.view='today'; render(); });
+
+  app.querySelectorAll('[data-session-rate]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var msg = rateSessionDifficulty(s.historyId, btn.getAttribute('data-session-rate'));
+      render();
+    });
+  });
 }
 
 function sparkline(points, w, h){
