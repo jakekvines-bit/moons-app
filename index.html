@@ -223,6 +223,16 @@ var EX = {
   reverseLunge: {name:"DB reverse lunge", pattern:"squat", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], perSide:true, risk:["hipFlexionDepth"], tempo:"3-1-1"},
   kettlebellReverseLunge:{name:"Kettlebell reverse lunge", pattern:"squat", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, risk:["hipFlexionDepth"], tempo:"3-1-1"},
   boxStepUp:    {name:"DB step-up", pattern:"squat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:10, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell + plyo box", equip:["dumbbell","plyobox"], perSide:true, note:"Drive through the lead heel, control the descent — box height sets your own safe depth.", tempo:"2-1-1"},
+  cyclistBackSquat:{name:"Cyclist back squat", pattern:"squat", role:"main", tier:1, sets:4, repLow:8, repHigh:10, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell + heel wedge (plates)", equip:["barbell"], risk:["deepKneeFlexion"], note:"Heels elevated on plates — more knee travel, more quad emphasis, upright torso.", tempo:"3-1-1"},
+  cossackSquat: {name:"Cossack squat", pattern:"squat", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, hasWeight:false, equipLabel:"None (dumbbell/kettlebell optional)", equip:[], risk:["hipFlexionDepth"], perSide:true, note:"Cross-plane lateral squat — sink into one side, keep the other leg long, only as deep as feels clean.", tempo:"3-1-1"},
+  gobletCossackSquat:{name:"Goblet Cossack squat", pattern:"squat", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell or kettlebell", equip:["dumbbell"], risk:["hipFlexionDepth"], perSide:true, note:"Same lateral squat, loaded goblet-style for extra counterbalance.", tempo:"3-1-1"},
+  footElevatedCossackSquat:{name:"Foot-elevated Cossack squat", pattern:"squat", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, hasWeight:false, equipLabel:"Plyo box or low step", equip:["plyobox"], risk:["hipFlexionDepth"], perSide:true, note:"Elevating the working foot lets you sink deeper on that side.", tempo:"3-1-1"},
+  cyclistHackSquat:{name:"Cyclist hack squat", pattern:"squat", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell + heel wedge", equip:["dumbbell"], note:"Heels elevated, upright torso — quad-focused squat variant.", tempo:"3-1-1"},
+  kickstandPistolSquat:{name:"Kickstand pistol squat", pattern:"squat", role:"accessory", tier:1, sets:3, repLow:6, repHigh:8, rest:100, increment:5, hasWeight:true, equipLabel:"Dumbbell (rear foot lightly kickstanded)", equip:["dumbbell"], risk:["deepKneeFlexion"], perSide:true, note:"Back toe stays down for balance only — builds toward a full single-leg squat.", tempo:"3-1-1"},
+  curtsyStepDown:{name:"Curtsy step-down", pattern:"squat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:10, rest:90, hasWeight:false, equipLabel:"Plyo box or low step", equip:["plyobox"], perSide:true, note:"Step back and across behind you as you lower — cross-plane control for the hip and knee.", tempo:"3-1-1"},
+  weightPlateReverseLunge:{name:"Weight plate reverse lunge (with reach)", pattern:"squat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:10, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell or plate", equip:["dumbbell"], perSide:true, note:"Reach the weight toward the floor as you lunge back — adds a reaching component to a standard lunge.", tempo:"2-1-1"},
+  dbLateralLunge:{name:"DB lateral lunge", pattern:"squat", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], perSide:true, note:"Step directly out to the side — true frontal-plane work most programs skip entirely.", tempo:"3-1-1"},
+  bodyweightCyclistSquatPulse:{name:"Bodyweight cyclist squat pulse", pattern:"squat", role:"finisher", tier:2, sets:3, repLow:15, repHigh:20, rest:45, hasWeight:false, equipLabel:"Heel wedge optional", equip:[], note:"Small controlled pulses at the bottom — burns out the quads to close out the pattern.", tempo:"1-1-1"},
 
   /* ---- hinge ---- */
   rdl:          {name:"Romanian deadlift", pattern:"hinge", role:"main", tier:1, sets:3, repLow:6, repHigh:8, rest:150, increment:5, hasWeight:true, equipLabel:"Barbell", equip:["barbell"], note:"Hinge at the hips, soft knees, keep the bar close and spine neutral — stop the descent well before any rounding.", tempo:"3-1-1"},
@@ -237,6 +247,16 @@ var EX = {
   gluteBridge:  {name:"Band glute bridge", pattern:"hinge", role:"finisher", tier:3, sets:3, repLow:12, repHigh:15, rest:60, hasWeight:false, equipLabel:"Band", equip:["band"], tempo:"2-1-1"},
   bandPullThrough:{name:"Band pull-through", pattern:"hinge", role:"finisher", tier:3, sets:3, repLow:12, repHigh:15, rest:60, hasWeight:false, equipLabel:"Band anchored behind you", equip:["band"], note:"Teaches the hip hinge under light, controlled tension — easy on the spine.", tempo:"2-0-2"},
   bandHamCurl:  {name:"Band lying hamstring curl", pattern:"hinge", role:"finisher", tier:3, sets:3, repLow:12, repHigh:15, rest:45, hasWeight:false, equipLabel:"Band anchored low", equip:["band"], note:"Pure hamstring isolation, lying down — zero hip flexion, zero spinal load.", tempo:"2-0-2"},
+  rackPull:     {name:"Rack pull", pattern:"hinge", role:"main", tier:1, sets:3, repLow:5, repHigh:6, rest:150, increment:10, hasWeight:true, equipLabel:"Barbell + rig (pull from knee height)", equip:["barbell"], risk:["heavyAxialSpineLoad"], note:"Partial-range deadlift from just below the knee — overloads the top of the pull heavily.", tempo:"2-1-1"},
+  hamstringMarch:{name:"Hamstring march", pattern:"hinge", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:60, hasWeight:false, equipLabel:"Bench or elevated surface", equip:["bench"], perSide:true, note:"Hips bridged up, one heel drives down as the other knee drives up — hamstring/glute control under tension.", tempo:"2-1-1"},
+  handSupportedSingleLegRDL:{name:"Hand-supported single-leg DB RDL", pattern:"hinge", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell + wall or rig for balance", equip:["dumbbell"], perSide:true, note:"Light hand support removes the balance challenge so you can actually load the hamstring/glute.", tempo:"3-1-1"},
+  bStanceHipThrust:{name:"B-stance hip thrust", pattern:"hinge", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:100, increment:10, hasWeight:true, equipLabel:"Barbell or dumbbell + bench", equip:["bench","dumbbell"], perSide:true, note:"One foot slightly forward shifts emphasis to the trailing glute — most of a single-leg thrust with more control.", tempo:"2-1-1"},
+  reverseNordicBandAssisted:{name:"Reverse Nordic (band-assisted)", pattern:"hinge", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, hasWeight:false, equipLabel:"Band anchored high, kneeling", equip:["band"], risk:["deepKneeFlexion"], note:"Kneeling, lean back under control — the band takes just enough load off to keep it controlled. Builds real knee/quad resilience.", tempo:"3-1-1"},
+  gobletGoodMorning:{name:"Goblet good morning", pattern:"hinge", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell or kettlebell", equip:["dumbbell"], note:"Held at the chest, hinge forward with a flat back — teaches the hinge pattern under light, safe load.", tempo:"3-1-1"},
+  seatedDbGoodMorning:{name:"Seated dumbbell good morning", pattern:"hinge", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell + bench", equip:["dumbbell","bench"], note:"Seated removes the legs entirely — pure hip hinge and low-back/hamstring work.", tempo:"3-1-1"},
+  dualDbSumoHighPull:{name:"Dual dumbbell sumo deadlift high pull", pattern:"hinge", role:"finisher", tier:1, sets:3, repLow:8, repHigh:12, rest:75, increment:5, hasWeight:true, equipLabel:"Dumbbells", equip:["dumbbell"], note:"Wide-stance deadlift into an explosive high pull — hinge power finisher.", tempo:"1-0-1"},
+  kbSnatch:     {name:"Kettlebell snatch", pattern:"hinge", role:"finisher", tier:1, sets:4, repLow:6, repHigh:8, rest:75, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, note:"Explosive hip-driven pull straight to lockout overhead — technical, high payoff for power.", tempo:"1-0-1"},
+  kbClean:      {name:"Kettlebell clean", pattern:"hinge", role:"finisher", tier:1, sets:4, repLow:6, repHigh:8, rest:75, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, note:"Hip-driven pull into the rack position — precedes the press/snatch progression.", tempo:"1-0-1"},
 
   /* ---- horizontal push (flat) ---- */
   bench:        {name:"Flat barbell bench press", pattern:"horizontalPushFlat", role:"main", tier:1, sets:3, repLow:8, repHigh:10, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell", equip:["barbell"], tempo:"3-1-1"},
@@ -247,6 +267,11 @@ var EX = {
   dipBarDip:    {name:"Dip bar tricep dip", pattern:"horizontalPushFlat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:12, rest:90, hasWeight:false, equipLabel:"Tricep dip bar", equip:["dipbar"], tempo:"2-1-1"},
   paralletteDip:{name:"Parallette dip", pattern:"horizontalPushFlat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:12, rest:90, hasWeight:false, equipLabel:"Parallette bars", equip:["parallettes"], tempo:"2-1-1"},
   tricepPushdown:{name:"Band tricep pushdown", pattern:"horizontalPushFlat", role:"finisher", tier:3, sets:3, repLow:15, repHigh:20, rest:45, hasWeight:false, equipLabel:"Band", equip:["band"], tempo:"2-0-2"},
+  floorPress:   {name:"Floor press", pattern:"horizontalPushFlat", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:100, increment:5, hasWeight:true, equipLabel:"Dumbbell or barbell + mat", equip:["dumbbell","mat"], note:"Limited range off the floor takes the shoulder out of the bottom position — elbow-friendly pressing.", tempo:"2-1-1"},
+  bandedBenchPress:{name:"Banded bench press", pattern:"horizontalPushFlat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell/barbell + band + bench", equip:["band","bench"], note:"Band adds resistance that increases through the press — extra tension at lockout.", tempo:"2-1-1"},
+  plyoPushup:   {name:"Plyo push-up", pattern:"horizontalPushFlat", role:"finisher", tier:1, sets:3, repLow:6, repHigh:10, rest:60, hasWeight:false, equipLabel:"None", equip:[], note:"Explosive off the ground — power finisher for the push pattern.", tempo:"1-0-1"},
+  offsetPushup: {name:"Offset push-up", pattern:"horizontalPushFlat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:12, rest:75, hasWeight:false, equipLabel:"None (plate/block optional under one hand)", equip:[], note:"One hand elevated shifts load unevenly — builds anti-rotation strength through the press.", tempo:"2-1-1"},
+  pushupShoulderTap:{name:"Push-up with shoulder tap", pattern:"horizontalPushFlat", role:"finisher", tier:2, sets:3, repLow:8, repHigh:12, rest:60, hasWeight:false, equipLabel:"None", equip:[], perSide:true, note:"Tap the opposite shoulder at the top of each rep — anti-rotation control under a plank position.", tempo:"2-0-1"},
 
   /* ---- horizontal push (incline) ---- */
   inclineBench: {name:"Incline barbell bench press", pattern:"horizontalPushIncline", role:"main", tier:1, sets:4, repLow:8, repHigh:10, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell + incline bench", equip:["barbell","bench"], tempo:"3-1-1"},
@@ -262,6 +287,8 @@ var EX = {
   wallPushup:   {name:"Wall push-up", pattern:"verticalPush", role:"main", tier:4, sets:3, repLow:12, repHigh:15, rest:75, hasWeight:false, equipLabel:"None (a wall)", equip:[], note:"Low-angle, shoulder-friendly pressing — a safe fallback regardless of shoulder history or available equipment.", tempo:"2-1-1"},
   lateralRaise: {name:"DB lateral raise", pattern:"verticalPush", role:"finisher", tier:2, sets:3, repLow:12, repHigh:15, rest:60, increment:2.5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], tempo:"3-0-1"},
   bandLateralRaise:{name:"Band lateral raise", pattern:"verticalPush", role:"finisher", tier:3, sets:3, repLow:15, repHigh:20, rest:45, hasWeight:false, equipLabel:"Band", equip:["band"], tempo:"3-0-1"},
+  seatedFillyPress:{name:"Seated Filly press", pattern:"verticalPush", role:"main", tier:1, sets:3, repLow:8, repHigh:10, rest:100, increment:5, hasWeight:true, equipLabel:"Kettlebell or dumbbell + bench", equip:["dumbbell","bench"], risk:["overheadPressing"], perSide:true, note:"Seated single-arm press with a slight lean-away — full-body tension, more shoulder-friendly than a strict standing press.", tempo:"2-1-1"},
+  singleArmDevilsPress:{name:"Single-arm devil's press", pattern:"verticalPush", role:"finisher", tier:1, sets:3, repLow:6, repHigh:8, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], perSide:true, note:"Burpee into a single-arm snatch-to-overhead — full-body, high-output finisher.", tempo:"1-0-1"},
 
   /* ---- horizontal pull ---- */
   row:          {name:"Barbell bent-over row", pattern:"horizontalPull", role:"main", tier:1, sets:3, repLow:8, repHigh:10, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell", equip:["barbell"], tempo:"2-1-1"},
@@ -271,6 +298,12 @@ var EX = {
   dbRow:        {name:"Single-arm DB row", pattern:"horizontalPull", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell + bench", equip:["dumbbell","bench"], perSide:true, tempo:"2-1-1"},
   kettlebellSingleArmRow:{name:"Single-arm kettlebell row", pattern:"horizontalPull", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Kettlebell + bench", equip:["kettlebell","bench"], perSide:true, tempo:"2-1-1"},
   facePull:     {name:"Band face pull", pattern:"horizontalPull", role:"finisher", tier:3, sets:3, repLow:15, repHigh:20, rest:45, hasWeight:false, equipLabel:"Band", equip:["band"], tempo:"2-0-2"},
+  bodyRow:      {name:"Body row", pattern:"horizontalPull", role:"accessory", tier:1, sets:3, repLow:8, repHigh:12, rest:90, hasWeight:false, equipLabel:"Rings, straps, or a low bar in a rig", equip:["pullupbar"], note:"Feet-out inverted row — adjust foot position to change difficulty.", tempo:"2-1-1"},
+  bulgarianRingRow:{name:"Bulgarian ring row", pattern:"horizontalPull", role:"accessory", tier:1, sets:3, repLow:8, repHigh:12, rest:90, hasWeight:false, equipLabel:"Rings or straps", equip:["pullupbar"], perSide:true, note:"Offset, single-arm-emphasis ring row — more unilateral pulling control than a standard row.", tempo:"2-1-1"},
+  ringRow:      {name:"Ring row", pattern:"horizontalPull", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:75, hasWeight:false, equipLabel:"Rings or straps", equip:["pullupbar"], tempo:"2-1-1"},
+  pendlayRow:   {name:"Pendlay row", pattern:"horizontalPull", role:"main", tier:1, sets:4, repLow:6, repHigh:8, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell", equip:["barbell"], note:"Dead-stop row from the floor every rep — strict, no momentum, builds real pulling strength.", tempo:"1-1-1"},
+  proneDbRow:   {name:"Prone DB row", pattern:"horizontalPull", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:75, increment:5, hasWeight:true, equipLabel:"Dumbbell + bench", equip:["dumbbell","bench"], note:"Chest supported on the bench — removes low-back involvement, pure lat/upper-back isolation.", tempo:"2-1-1"},
+  dbMeadowRow:  {name:"DB meadow row", pattern:"horizontalPull", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], perSide:true, note:"Staggered stance, pull toward the hip at an angle — hits the lat through a different line than a standard row.", tempo:"2-1-1"},
 
   /* ---- vertical pull ---- */
   pullup:       {name:"Weighted pull-up", pattern:"verticalPull", role:"main", tier:1, sets:4, repLow:5, repHigh:8, rest:120, increment:5, hasWeight:true, equipLabel:"Pull-up bar", equip:["pullupbar"], note:"Use bodyweight only if 0 added weight; add belt/vest/backpack once you can hit 8 reps for all sets.", tempo:"2-1-1"},
@@ -278,6 +311,10 @@ var EX = {
   bandAssistedPullup:{name:"Band-assisted pull-up", pattern:"verticalPull", role:"main", tier:2, sets:4, repLow:6, repHigh:10, rest:120, hasWeight:false, equipLabel:"Pull-up bar + band", equip:["pullupbar","band"], note:"Loop the band over the bar and under a knee/foot to take off just enough weight to hit full reps.", tempo:"2-1-1"},
   chinup:       {name:"Chin-up", pattern:"verticalPull", role:"accessory", tier:2, sets:3, repLow:5, repHigh:8, rest:90, hasWeight:false, equipLabel:"Pull-up bar", equip:["pullupbar"], tempo:"2-1-1"},
   rearDeltFly:  {name:"DB rear delt fly", pattern:"verticalPull", role:"finisher", tier:2, sets:3, repLow:12, repHigh:15, rest:45, increment:2.5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], tempo:"3-0-1"},
+  leanAwayPullup:{name:"Lean-away pull-up", pattern:"verticalPull", role:"main", tier:1, sets:3, repLow:5, repHigh:8, rest:120, hasWeight:false, equipLabel:"Pull-up bar", equip:["pullupbar"], note:"Lean back and pull toward an angle instead of straight up — more lat recruitment, harder than a standard strict pull-up.", tempo:"2-1-1"},
+  kbWindmill:   {name:"Kettlebell windmill", pattern:"verticalPull", role:"accessory", tier:1, sets:3, repLow:6, repHigh:8, rest:90, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, note:"Locked overhead arm, hinge and reach the opposite hand to the floor — cross-plane loaded mobility.", tempo:"3-1-1"},
+  uprightRow:   {name:"Upright row", pattern:"verticalPull", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:75, increment:5, hasWeight:true, equipLabel:"Dumbbell or barbell", equip:["dumbbell"], risk:["overheadPressing"], note:"Pull straight up along the body to about chest height — keep it below shoulder height if it ever pinches.", tempo:"2-1-1"},
+  supinatedPullupIsometric:{name:"Supinated pull-up isometric hold", pattern:"verticalPull", role:"finisher", tier:2, sets:3, repLow:15, repHigh:30, rest:60, hasWeight:false, equipLabel:"Pull-up bar", equip:["pullupbar"], isTime:true, note:"Hold at the top, palms facing you — builds the lockout strength that's usually the weak point."},
 
   /* ---- core (all finisher-role) ---- */
   standingCoreMarch:{name:"Standing anti-rotation march", pattern:"core", role:"finisher", tier:3, sets:3, repLow:12, repHigh:16, rest:45, hasWeight:false, equipLabel:"None", equip:[], perSide:true, note:"Standing, brace the core, drive the knee up without letting the torso rotate — no floor contact needed."},
@@ -286,7 +323,10 @@ var EX = {
   pallof:       {name:"Band Pallof press", pattern:"core", role:"finisher", tier:2, sets:3, repLow:10, repHigh:12, rest:45, hasWeight:false, equipLabel:"Band", equip:["band"], perSide:true, note:"Anti-rotation hold — you resist the twist, the spine doesn't move.", tempo:"2-2-2"},
   plank:        {name:"Weighted plank (hold, seconds)", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:45, increment:0, hasWeight:false, equipLabel:"Mat", equip:["mat"], isTime:true, note:"Neutral spine — ribs down, no sagging or arching."},
   suitcaseCarry:{name:"Suitcase carry", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:60, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], isTime:true, perSide:true, note:"Anti-lateral-flexion — resist leaning toward the loaded side."},
-  kettlebellSuitcaseCarry:{name:"Kettlebell suitcase carry", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:60, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], isTime:true, perSide:true, note:"Anti-lateral-flexion — resist leaning toward the loaded side."}
+  kettlebellSuitcaseCarry:{name:"Kettlebell suitcase carry", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:60, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], isTime:true, perSide:true, note:"Anti-lateral-flexion — resist leaning toward the loaded side."},
+  quadrupedCrawl:{name:"Quadruped crawl", pattern:"core", role:"finisher", tier:1, sets:3, repLow:30, repHigh:45, rest:45, hasWeight:false, equipLabel:"Mat / open floor space", equip:["mat"], isTime:true, note:"Hands and feet only, hips low, opposite-limb crawl forward and back — full-body inside-out control."},
+  standingBandHipAbduction:{name:"Standing band hip abduction", pattern:"core", role:"finisher", tier:2, sets:3, repLow:12, repHigh:15, rest:45, hasWeight:false, equipLabel:"Band anchored low", equip:["band"], perSide:true, note:"Standing, resist the band pulling the leg in — builds hip/glute stability from the outside-in.", tempo:"2-0-2"},
+  dualKbRackLateralBandWalk:{name:"Dual kettlebell rack lateral band walk", pattern:"core", role:"finisher", tier:1, sets:3, repLow:10, repHigh:12, rest:60, hasWeight:false, equipLabel:"Kettlebells + band around ankles", equip:["kettlebell","band"], perSide:true, note:"Kettlebells held at the rack for anti-extension while the band challenges the hips laterally — a genuine cross-plane, inside-out core drill."}
 };
 EX.squat = EX.backSquat; // back-compat alias: old history/session data referenced the id "squat" before this was renamed
 
@@ -372,11 +412,15 @@ function bucketsForExIds(exIds){
 var WARMUP_POOL = {
   general: [
     {name:"Light cardio — jump rope, jog in place, or an easy bike spin", duration:90, note:"Just enough to break a light sweat before anything else."},
-    {name:"Arm circles + leg swings", duration:60, note:"10 each direction, each side — wakes up the shoulders and hips."}
+    {name:"Arm circles + leg swings", duration:60, note:"10 each direction, each side — wakes up the shoulders and hips."},
+    {name:"Half-kneeling dumbbell windmill (light)", duration:45, note:"Very light load, slow reps each side — cross-plane mobility to open up before anything else."}
   ],
   lowerBody: [
     {name:"Bodyweight squats", duration:45, note:"Slow and controlled through whatever range feels clean."},
-    {name:"Walking lunges or front-to-back leg swings", duration:45, note:"10 per side."}
+    {name:"Walking lunges or front-to-back leg swings", duration:45, note:"10 per side."},
+    {name:"Alternating forward lunge", duration:45, note:"10 per side — dynamic range through the hip before loading it."},
+    {name:"Lateral banded walk", duration:45, note:"10 steps each direction — wakes up the glutes and hips before squatting or hinging."},
+    {name:"Single-leg bodyweight hip thrust", duration:45, note:"8 per side — primes the glutes for hinge work."}
   ],
   upperPush: [
     {name:"Wall slides or scapular push-ups", duration:45, note:"Wakes up the shoulder blades before pressing."},
@@ -384,36 +428,60 @@ var WARMUP_POOL = {
   ],
   upperPull: [
     {name:"Band pull-aparts", duration:45, note:"High reps, light tension — primes the upper back."},
-    {name:"Dead hangs or scap pull-ups", duration:45, note:"If you've got a bar — wakes up the lats and grip."}
+    {name:"Dead hangs or scap pull-ups", duration:45, note:"If you've got a bar — wakes up the lats and grip."},
+    {name:"Banded face pull", duration:45, note:"High reps, light band — gets the upper back and rear delts firing before pulling."}
   ],
   core: [
-    {name:"Cat-cow + dead bug", duration:45, note:"Mobilizes the spine before loading the core."}
+    {name:"Cat-cow + dead bug", duration:45, note:"Mobilizes the spine before loading the core."},
+    {name:"Bear crawl to crab reach", duration:45, note:"A few reps each direction — cross-plane, inside-out warmup for the whole trunk."}
   ]
 };
 
 var STRETCH_POOL = {
   general: [
     {name:"World's greatest stretch", duration:60, note:"60s per side — hips, hamstrings, and thoracic spine in one move."},
-    {name:"Couch stretch", duration:60, note:"60s per side — one of the best long-term investments for hip flexor length."}
+    {name:"Couch stretch", duration:60, note:"60s per side — one of the best long-term investments for hip flexor length."},
+    {name:"Segmented cat/cow", duration:45, note:"Move one vertebra at a time — decompresses the spine after loading it."},
+    {name:"Sidelying thoracic rotation (90/90 variant)", duration:45, note:"45s per side — opens up rotation through the mid-back."}
   ],
   lowerBody: [
     {name:"Pigeon stretch (a.k.a. the \"perfect stretch\")", duration:60, note:"60s per side — deep hip opener, ease in, never into pain."},
-    {name:"Standing hamstring stretch or forward fold", duration:45, note:"Soft knees, let gravity do the work."}
+    {name:"Standing hamstring stretch or forward fold", duration:45, note:"Soft knees, let gravity do the work."},
+    {name:"Half-kneeling hip flexor stretch", duration:60, note:"60s per side — direct hip flexor length work, pairs well with the couch stretch."},
+    {name:"Shinbox heel touch", duration:45, note:"45s per side — internal/external hip rotation, great after squatting."},
+    {name:"Reclining hero pose", duration:60, note:"Ease in slowly — deep quad and knee stretch, back off if it pinches."},
+    {name:"Pancake stretch", duration:60, note:"Hinge forward from a wide seated straddle — hamstrings and inner thigh."},
+    {name:"Butterfly stretch", duration:45, note:"Soles together, knees relaxed toward the floor — inner thigh and hip."},
+    {name:"Half split hip hinge", duration:60, note:"60s per side — hamstring length with a hip-hinge pattern built in."},
+    {name:"Bottom of squat hold", duration:45, note:"Sit in the bottom of a bodyweight squat, chest tall — ankle, hip, and low-back mobility together."},
+    {name:"Front split", duration:60, note:"60s per side — only as deep as feels controlled, this one takes time to build."}
   ],
   upperPush: [
-    {name:"Doorway chest stretch", duration:45, note:"45s per side — opens the front of the shoulder after pressing."}
+    {name:"Doorway chest stretch", duration:45, note:"45s per side — opens the front of the shoulder after pressing."},
+    {name:"Forward shoulder wall circles", duration:45, note:"Slow, full-range circles against the wall — opens the front of the shoulder capsule."},
+    {name:"Seated barbell shoulder extension", duration:45, note:"Light, empty bar behind the back — opens the chest and front delts through extension."}
   ],
   upperPull: [
-    {name:"Child's pose reach + lat stretch", duration:45, note:"45s per side — releases the lats and upper back after pulling."}
+    {name:"Child's pose reach + lat stretch", duration:45, note:"45s per side — releases the lats and upper back after pulling."},
+    {name:"Passive hang", duration:30, note:"30–45s from a bar, fully relaxed — decompresses the shoulders and lats after pulling."}
   ],
   core: [
     {name:"Plank hold", duration:30, note:"30–45s — reinforces the bracing you used all session."}
   ]
 };
 
-function itemsForBuckets(pool, buckets){
-  var items = pool.general.slice();
-  buckets.forEach(function(b){ if(pool[b]) items = items.concat(pool[b]); });
+function pickRotating(list, cycle, count){
+  if(!list || !list.length) return [];
+  if(list.length <= count) return list.slice();
+  var out = [];
+  for(var i=0;i<count;i++){ out.push(list[(cycle+i) % list.length]); }
+  return out;
+}
+
+function itemsForBuckets(pool, buckets, cycle){
+  cycle = cycle || 0;
+  var items = pickRotating(pool.general, cycle, 2);
+  buckets.forEach(function(b){ if(pool[b]) items = items.concat(pickRotating(pool[b], cycle, 2)); });
   return items;
 }
 
@@ -421,8 +489,8 @@ function totalDuration(items){
   return items.reduce(function(sum, it){ return sum + (it.duration||0); }, 0);
 }
 
-function warmupHtml(buckets){
-  var items = itemsForBuckets(WARMUP_POOL, buckets);
+function warmupHtml(buckets, cycle){
+  var items = itemsForBuckets(WARMUP_POOL, buckets, cycle);
   var mins = Math.round(totalDuration(items)/60);
   var html = '<div class="card framedcard"><h2>Warmup (~'+(mins<1?1:mins)+' min)</h2>';
   items.forEach(function(it){
@@ -433,8 +501,8 @@ function warmupHtml(buckets){
   return html;
 }
 
-function stretchHtml(buckets){
-  var items = itemsForBuckets(STRETCH_POOL, buckets);
+function stretchHtml(buckets, cycle){
+  var items = itemsForBuckets(STRETCH_POOL, buckets, cycle);
   var mins = Math.round(totalDuration(items)/60);
   var html = '<div class="card framedcard"><h2>Cooldown stretches (~'+(mins<1?1:mins)+' min)</h2>';
   items.forEach(function(it){
@@ -490,7 +558,9 @@ function freshState(){
     profile: JSON.parse(JSON.stringify(DEFAULT_PROFILE)),
     conditioningTier: 1,
     conditioningStreak: {direction:null, count:0},
-    cycleCompleted: {A:false, B:false, C:false}
+    cycleCompleted: {A:false, B:false, C:false},
+    lastPicked: {},
+    warmupCycleCounter: 0
   };
 }
 
@@ -516,6 +586,9 @@ function normalizeState(){
   if(!state.conditioningStreak || typeof state.conditioningStreak.count !== "number") state.conditioningStreak = {direction:null, count:0};
   if(!state.cycleCompleted) state.cycleCompleted = {};
   ROTATION.forEach(function(k){ if(typeof state.cycleCompleted[k] !== "boolean") state.cycleCompleted[k] = false; });
+  if(!state.lastPicked || typeof state.lastPicked !== "object") state.lastPicked = {};
+  if(typeof state.warmupCycleCounter !== "number") state.warmupCycleCounter = 0;
+  if(state.current && typeof state.current.warmupCycle !== "number") state.current.warmupCycle = 0;
   /* discard an in-progress session saved by an older version of this file (data shape changed) */
   if(state.current && !Array.isArray(state.current.groups)) state.current = null;
   if(state.current && typeof state.current.conditioningRating === "undefined") state.current.conditioningRating = null;
@@ -575,8 +648,15 @@ function rankByTier(ids){
 /* Layered fallback: exact pattern+role (unused) -> exact pattern+role (any) ->
    relax role within pattern (unused) -> relax role within pattern (any) ->
    ignore safety filtering entirely for the pattern -> absolute last resort, anything in the library.
-   This guarantees a pick always exists, even for a zero-equipment, every-ailment-checked profile. */
-function pickForSlot(pattern, role, profile, usedIds){
+   This guarantees a pick always exists, even for a zero-equipment, every-ailment-checked profile.
+
+   avoidId (optional): the exercise picked for this same pattern+role last time.
+   Without this, the picker is fully deterministic -- same profile, same slot,
+   same exercise, forever -- which was the actual root cause of the program
+   feeling repetitive. When there's a same-tier alternative (or any alternative
+   at all) to avoidId, prefer it; only fall back to repeating it if it's truly
+   the only option in the pool that matched. */
+function pickForSlot(pattern, role, profile, usedIds, avoidId){
   usedIds = usedIds || [];
   function safeUnused(ids){ return ids.filter(function(id){ return !isBlocked(EX[id],profile) && usedIds.indexOf(id)<0; }); }
   function safeOnly(ids){ return ids.filter(function(id){ return !isBlocked(EX[id],profile); }); }
@@ -585,7 +665,16 @@ function pickForSlot(pattern, role, profile, usedIds){
   var pools = [safeUnused(exactRole), safeOnly(exactRole), safeUnused(anyRole), safeOnly(anyRole), anyRole];
   for(var i=0;i<pools.length;i++){
     var ranked = rankByTier(pools[i]);
-    if(ranked.length) return ranked[0];
+    if(!ranked.length) continue;
+    if(avoidId){
+      var topTier = EX[ranked[0]].tier || 9;
+      var tiedTop = ranked.filter(function(id){ return (EX[id].tier||9) === topTier; });
+      var altTop = tiedTop.filter(function(id){ return id !== avoidId; });
+      if(altTop.length) return altTop[0];
+      var altAny = ranked.filter(function(id){ return id !== avoidId; });
+      if(altAny.length) return altAny[0];
+    }
+    return ranked[0];
   }
   return rankByTier(Object.keys(EX))[0];
 }
@@ -672,8 +761,8 @@ function buildBonusDay(){
 }
 
 /* ---------------- session lifecycle ---------------- */
-function buildSessionExercise(pattern, role, usedIds){
-  var exId = pickForSlot(pattern, role, state.profile, usedIds);
+function buildSessionExercise(pattern, role, usedIds, avoidId){
+  var exId = pickForSlot(pattern, role, state.profile, usedIds, avoidId);
   usedIds.push(exId);
   var ex = EX[exId], p = getProgress(exId);
   var sets = [];
@@ -681,17 +770,28 @@ function buildSessionExercise(pattern, role, usedIds){
   return {exId:exId, targetWeight:p.weight, targetReps:p.repTarget, sets:sets};
 }
 
+/* Read-only lookup of "what got picked for this slot last time" -- used to bias
+   away from repeats without ever mutating state (previews must not affect what
+   you'd actually get if you started the day for real). */
+function lastPickedFor(pattern, role){
+  return state.lastPicked ? state.lastPicked[pattern+"|"+role] : null;
+}
+function rememberPicked(pattern, role, exId){
+  if(!state.lastPicked) state.lastPicked = {};
+  state.lastPicked[pattern+"|"+role] = exId;
+}
+
 function previewNames(tpl){
   var used = [];
   return tpl.slots.map(function(slot){
     if(slot.type==="superset"){
       return slot.parts.map(function(part){
-        var id = pickForSlot(part.pattern, part.role, state.profile, used);
+        var id = pickForSlot(part.pattern, part.role, state.profile, used, lastPickedFor(part.pattern, part.role));
         used.push(id);
         return EX[id].name;
       }).join(" + ") + " (superset)";
     }
-    var id = pickForSlot(slot.pattern, slot.role, state.profile, used);
+    var id = pickForSlot(slot.pattern, slot.role, state.profile, used, lastPickedFor(slot.pattern, slot.role));
     used.push(id);
     return EX[id].name;
   });
@@ -710,15 +810,22 @@ function startSession(dayKey){
   if(state.current) return false; /* never clobber an in-progress session's unsaved logs */
   var tpl = dayKey==="D" ? buildBonusDay() : TEMPLATES[dayKey];
   var used = [];
+  function pickReal(pattern, role){
+    var item = buildSessionExercise(pattern, role, used, lastPickedFor(pattern, role));
+    rememberPicked(pattern, role, item.exId);
+    return item;
+  }
   var groups = tpl.slots.map(function(slot){
     if(slot.type==="superset"){
-      return {type:"superset", restBetween:slot.restBetween, restAfterRound:slot.restAfterRound, items: slot.parts.map(function(part){ return buildSessionExercise(part.pattern, part.role, used); })};
+      return {type:"superset", restBetween:slot.restBetween, restAfterRound:slot.restAfterRound, items: slot.parts.map(function(part){ return pickReal(part.pattern, part.role); })};
     }
-    var item = buildSessionExercise(slot.pattern, slot.role, used);
+    var item = pickReal(slot.pattern, slot.role);
     return {type:"single", rest: EX[item.exId].rest, item:item};
   });
   var condId = pickConditioning(tpl.cond, state.profile);
-  state.current = {dayKey:dayKey, label:tpl.label, cond:tpl.cond, condId:condId, conditioningTierUsed:state.conditioningTier, conditioningRating:null, groups:groups, isBonus:!!tpl.isBonus, startedAt:Date.now()};
+  var warmupCycle = state.warmupCycleCounter||0;
+  state.warmupCycleCounter = warmupCycle + 1;
+  state.current = {dayKey:dayKey, label:tpl.label, cond:tpl.cond, condId:condId, conditioningTierUsed:state.conditioningTier, conditioningRating:null, groups:groups, isBonus:!!tpl.isBonus, startedAt:Date.now(), warmupCycle:warmupCycle};
   save();
   return true;
 }
@@ -1084,7 +1191,7 @@ function renderToday(){
 
     var curExIds = flattenGroups(cur.groups).map(function(e){ return e.exId; });
     var curBuckets = bucketsForExIds(curExIds);
-    html += warmupHtml(curBuckets);
+    html += warmupHtml(curBuckets, cur.warmupCycle);
 
     function exerciseBlock(e, gi, ii, pairLabel){
       var ex = EX[e.exId];
@@ -1150,7 +1257,7 @@ function renderToday(){
     }
     html += '</div>';
 
-    html += stretchHtml(curBuckets);
+    html += stretchHtml(curBuckets, cur.warmupCycle);
 
     html += '<div class="card framedcard"><h2>How did this one go?</h2>';
     html += '<p class="muted" style="margin-bottom:8px;">Too easy, too hard, aggravated something, hated an exercise — say so here. It\'s tagged to this specific workout and goes straight to Jake.</p>';
@@ -1259,16 +1366,17 @@ function renderDayPreview(dayKey){
   var groups = tpl.slots.map(function(slot){
     if(slot.type === "superset"){
       return {type:"superset", restBetween:slot.restBetween, restAfterRound:slot.restAfterRound,
-        items: slot.parts.map(function(part){ return buildSessionExercise(part.pattern, part.role, used); })};
+        items: slot.parts.map(function(part){ return buildSessionExercise(part.pattern, part.role, used, lastPickedFor(part.pattern, part.role)); })};
     }
-    var item = buildSessionExercise(slot.pattern, slot.role, used);
+    var item = buildSessionExercise(slot.pattern, slot.role, used, lastPickedFor(slot.pattern, slot.role));
     return {type:"single", rest: EX[item.exId].rest, item:item};
   });
   var condId = pickConditioning(tpl.cond, state.profile);
   var previewBuckets = bucketsForTemplate(tpl);
+  var previewCycle = state.warmupCycleCounter||0;
 
   var html = '<div class="topbar"><h1>'+tpl.label+'</h1><p class="muted">Preview — nothing is logged until you start it</p></div>';
-  html += warmupHtml(previewBuckets);
+  html += warmupHtml(previewBuckets, previewCycle);
 
   function previewBlock(e, pairLabel){
     var ex = EX[e.exId];
@@ -1303,7 +1411,7 @@ function renderDayPreview(dayKey){
 
   html += '<div class="card framedcard"><div class="exname">Conditioning finisher</div><p class="exmeta">'+CONDITIONING_POOL[condId].name+' — '+conditioningDesc(condId, state.conditioningTier)+'</p></div>';
 
-  html += stretchHtml(previewBuckets);
+  html += stretchHtml(previewBuckets, previewCycle);
 
   html += '<div style="display:flex;gap:8px;margin-top:4px;">';
   html += '<button style="flex:1;" id="previewBackBtn">← Back to Calendar</button>';
