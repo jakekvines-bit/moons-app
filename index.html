@@ -160,6 +160,10 @@ var pendingDeviceLink = null;
    just a look, not something that needs to sync or persist. */
 var previewDayKey = null;
 
+/* Which bike workout card is expanded to show its full interval structure.
+   Local to this page load, same reasoning as previewDayKey. */
+var expandedBikeKey = null;
+
 function deviceLinkParamToken(){
   try{
     var u = new URL(window.location.href);
@@ -254,9 +258,9 @@ var EX = {
   reverseNordicBandAssisted:{name:"Reverse Nordic (band-assisted)", pattern:"hinge", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:90, hasWeight:false, equipLabel:"Band anchored high, kneeling", equip:["band"], risk:["deepKneeFlexion"], note:"Kneeling, lean back under control — the band takes just enough load off to keep it controlled. Builds real knee/quad resilience.", tempo:"3-1-1"},
   gobletGoodMorning:{name:"Goblet good morning", pattern:"hinge", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell or kettlebell", equip:["dumbbell"], note:"Held at the chest, hinge forward with a flat back — teaches the hinge pattern under light, safe load.", tempo:"3-1-1"},
   seatedDbGoodMorning:{name:"Seated dumbbell good morning", pattern:"hinge", role:"accessory", tier:2, sets:3, repLow:10, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell + bench", equip:["dumbbell","bench"], note:"Seated removes the legs entirely — pure hip hinge and low-back/hamstring work.", tempo:"3-1-1"},
-  dualDbSumoHighPull:{name:"Dual dumbbell sumo deadlift high pull", pattern:"hinge", role:"finisher", tier:1, sets:3, repLow:8, repHigh:12, rest:75, increment:5, hasWeight:true, equipLabel:"Dumbbells", equip:["dumbbell"], note:"Wide-stance deadlift into an explosive high pull — hinge power finisher.", tempo:"1-0-1"},
-  kbSnatch:     {name:"Kettlebell snatch", pattern:"hinge", role:"finisher", tier:1, sets:4, repLow:6, repHigh:8, rest:75, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, note:"Explosive hip-driven pull straight to lockout overhead — technical, high payoff for power.", tempo:"1-0-1"},
-  kbClean:      {name:"Kettlebell clean", pattern:"hinge", role:"finisher", tier:1, sets:4, repLow:6, repHigh:8, rest:75, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, note:"Hip-driven pull into the rack position — precedes the press/snatch progression.", tempo:"1-0-1"},
+  dualDbSumoHighPull:{name:"Dual dumbbell sumo deadlift high pull", pattern:"hinge", role:"finisher", tier:3, sets:3, repLow:8, repHigh:12, rest:75, increment:5, hasWeight:true, equipLabel:"Dumbbells", equip:["dumbbell"], note:"Wide-stance deadlift into an explosive high pull — hinge power finisher.", tempo:"1-0-1"},
+  kbSnatch:     {name:"Kettlebell snatch", pattern:"hinge", role:"finisher", tier:3, sets:4, repLow:6, repHigh:8, rest:75, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, note:"Explosive hip-driven pull straight to lockout overhead — technical, high payoff for power.", tempo:"1-0-1"},
+  kbClean:      {name:"Kettlebell clean", pattern:"hinge", role:"finisher", tier:3, sets:4, repLow:6, repHigh:8, rest:75, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], perSide:true, note:"Hip-driven pull into the rack position — precedes the press/snatch progression.", tempo:"1-0-1"},
 
   /* ---- horizontal push (flat) ---- */
   bench:        {name:"Flat barbell bench press", pattern:"horizontalPushFlat", role:"main", tier:1, sets:3, repLow:8, repHigh:10, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell", equip:["barbell"], tempo:"3-1-1"},
@@ -269,9 +273,9 @@ var EX = {
   tricepPushdown:{name:"Band tricep pushdown", pattern:"horizontalPushFlat", role:"finisher", tier:3, sets:3, repLow:15, repHigh:20, rest:45, hasWeight:false, equipLabel:"Band", equip:["band"], tempo:"2-0-2"},
   floorPress:   {name:"Floor press", pattern:"horizontalPushFlat", role:"accessory", tier:1, sets:3, repLow:8, repHigh:10, rest:100, increment:5, hasWeight:true, equipLabel:"Dumbbell or barbell + mat", equip:["dumbbell","mat"], note:"Limited range off the floor takes the shoulder out of the bottom position — elbow-friendly pressing.", tempo:"2-1-1"},
   bandedBenchPress:{name:"Banded bench press", pattern:"horizontalPushFlat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:12, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell/barbell + band + bench", equip:["band","bench"], note:"Band adds resistance that increases through the press — extra tension at lockout.", tempo:"2-1-1"},
-  plyoPushup:   {name:"Plyo push-up", pattern:"horizontalPushFlat", role:"finisher", tier:1, sets:3, repLow:6, repHigh:10, rest:60, hasWeight:false, equipLabel:"None", equip:[], note:"Explosive off the ground — power finisher for the push pattern.", tempo:"1-0-1"},
+  plyoPushup:   {name:"Plyo push-up", pattern:"horizontalPushFlat", role:"finisher", tier:3, sets:3, repLow:6, repHigh:10, rest:60, hasWeight:false, equipLabel:"None", equip:[], note:"Explosive off the ground — power finisher for the push pattern.", tempo:"1-0-1"},
   offsetPushup: {name:"Offset push-up", pattern:"horizontalPushFlat", role:"accessory", tier:2, sets:3, repLow:8, repHigh:12, rest:75, hasWeight:false, equipLabel:"None (plate/block optional under one hand)", equip:[], note:"One hand elevated shifts load unevenly — builds anti-rotation strength through the press.", tempo:"2-1-1"},
-  pushupShoulderTap:{name:"Push-up with shoulder tap", pattern:"horizontalPushFlat", role:"finisher", tier:2, sets:3, repLow:8, repHigh:12, rest:60, hasWeight:false, equipLabel:"None", equip:[], perSide:true, note:"Tap the opposite shoulder at the top of each rep — anti-rotation control under a plank position.", tempo:"2-0-1"},
+  pushupShoulderTap:{name:"Push-up with shoulder tap", pattern:"horizontalPushFlat", role:"finisher", tier:3, sets:3, repLow:8, repHigh:12, rest:60, hasWeight:false, equipLabel:"None", equip:[], perSide:true, note:"Tap the opposite shoulder at the top of each rep — anti-rotation control under a plank position.", tempo:"2-0-1"},
 
   /* ---- horizontal push (incline) ---- */
   inclineBench: {name:"Incline barbell bench press", pattern:"horizontalPushIncline", role:"main", tier:1, sets:4, repLow:8, repHigh:10, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell + incline bench", equip:["barbell","bench"], tempo:"3-1-1"},
@@ -288,7 +292,7 @@ var EX = {
   lateralRaise: {name:"DB lateral raise", pattern:"verticalPush", role:"finisher", tier:2, sets:3, repLow:12, repHigh:15, rest:60, increment:2.5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], tempo:"3-0-1"},
   bandLateralRaise:{name:"Band lateral raise", pattern:"verticalPush", role:"finisher", tier:3, sets:3, repLow:15, repHigh:20, rest:45, hasWeight:false, equipLabel:"Band", equip:["band"], tempo:"3-0-1"},
   seatedFillyPress:{name:"Seated Filly press", pattern:"verticalPush", role:"main", tier:1, sets:3, repLow:8, repHigh:10, rest:100, increment:5, hasWeight:true, equipLabel:"Kettlebell or dumbbell + bench", equip:["dumbbell","bench"], risk:["overheadPressing"], perSide:true, note:"Seated single-arm press with a slight lean-away — full-body tension, more shoulder-friendly than a strict standing press.", tempo:"2-1-1"},
-  singleArmDevilsPress:{name:"Single-arm devil's press", pattern:"verticalPush", role:"finisher", tier:1, sets:3, repLow:6, repHigh:8, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], perSide:true, note:"Burpee into a single-arm snatch-to-overhead — full-body, high-output finisher.", tempo:"1-0-1"},
+  singleArmDevilsPress:{name:"Single-arm devil's press", pattern:"verticalPush", role:"finisher", tier:2, sets:3, repLow:6, repHigh:8, rest:90, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], perSide:true, note:"Burpee into a single-arm snatch-to-overhead — full-body, high-output finisher.", tempo:"1-0-1"},
 
   /* ---- horizontal pull ---- */
   row:          {name:"Barbell bent-over row", pattern:"horizontalPull", role:"main", tier:1, sets:3, repLow:8, repHigh:10, rest:120, increment:5, hasWeight:true, equipLabel:"Barbell", equip:["barbell"], tempo:"2-1-1"},
@@ -324,7 +328,7 @@ var EX = {
   plank:        {name:"Weighted plank (hold, seconds)", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:45, increment:0, hasWeight:false, equipLabel:"Mat", equip:["mat"], isTime:true, note:"Neutral spine — ribs down, no sagging or arching."},
   suitcaseCarry:{name:"Suitcase carry", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:60, increment:5, hasWeight:true, equipLabel:"Dumbbell", equip:["dumbbell"], isTime:true, perSide:true, note:"Anti-lateral-flexion — resist leaning toward the loaded side."},
   kettlebellSuitcaseCarry:{name:"Kettlebell suitcase carry", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:60, increment:5, hasWeight:true, equipLabel:"Kettlebell", equip:["kettlebell"], isTime:true, perSide:true, note:"Anti-lateral-flexion — resist leaning toward the loaded side."},
-  quadrupedCrawl:{name:"Quadruped crawl", pattern:"core", role:"finisher", tier:1, sets:3, repLow:30, repHigh:45, rest:45, hasWeight:false, equipLabel:"Mat / open floor space", equip:["mat"], isTime:true, note:"Hands and feet only, hips low, opposite-limb crawl forward and back — full-body inside-out control."},
+  quadrupedCrawl:{name:"Quadruped crawl", pattern:"core", role:"finisher", tier:2, sets:3, repLow:30, repHigh:45, rest:45, hasWeight:false, equipLabel:"Mat / open floor space", equip:["mat"], isTime:true, note:"Hands and feet only, hips low, opposite-limb crawl forward and back — full-body inside-out control."},
   standingBandHipAbduction:{name:"Standing band hip abduction", pattern:"core", role:"finisher", tier:2, sets:3, repLow:12, repHigh:15, rest:45, hasWeight:false, equipLabel:"Band anchored low", equip:["band"], perSide:true, note:"Standing, resist the band pulling the leg in — builds hip/glute stability from the outside-in.", tempo:"2-0-2"},
   dualKbRackLateralBandWalk:{name:"Dual kettlebell rack lateral band walk", pattern:"core", role:"finisher", tier:1, sets:3, repLow:10, repHigh:12, rest:60, hasWeight:false, equipLabel:"Kettlebells + band around ankles", equip:["kettlebell","band"], perSide:true, note:"Kettlebells held at the rack for anti-extension while the band challenges the hips laterally — a genuine cross-plane, inside-out core drill."}
 };
@@ -542,15 +546,79 @@ function isoDateOffset(daysAgo){
   d.setDate(d.getDate() - daysAgo);
   return d.toISOString().slice(0,10);
 }
-/* was there a hard-intensity day logged yesterday? -- used to softly steer away
-   from stacking two hard days back to back, never to block it outright */
+/* was there a hard-intensity day logged yesterday, strength OR bike? -- used to
+   softly steer away from stacking two hard days back to back, never to block it. */
 function hardDayYesterday(){
   var y = isoDateOffset(1);
   for(var i=0;i<state.history.length;i++){
     var h = state.history[i];
-    if(h.date===y && intensityFor(h.dayKey)==="hard") return h;
+    if(h.date===y && intensityFor(h.dayKey)==="hard") return {label:h.label, kind:"strength"};
+  }
+  for(var j=0;j<state.bikeHistory.length;j++){
+    var b = state.bikeHistory[j];
+    if(b.date===y && bikeIntensityFor(b.workoutKey)==="hard") return {label:BIKE_WORKOUTS[b.workoutKey].name, kind:"bike"};
   }
   return null;
+}
+
+/* ---------------- bike engine ---------------- */
+var BIKE_ROTATION = ["aerobicBase","conditioningBuilder","leanLegGrinder"];
+
+var BIKE_WORKOUTS = {
+  aerobicBase: {
+    key:"aerobicBase", name:"Aerobic Base", intensity:"easy",
+    tagline:"Build the engine without trashing your legs. May feel almost too easy — that's the point.",
+    blocks:[
+      {label:"Warm-up", seconds:300, detail:"Easy, build gradually into it."},
+      {label:"Main set — continuous", seconds:1500, detail:"RPE 5–6/10 the whole way. You should be breathing harder but able to speak in sentences. Cadence ~70–80 RPM, damper moderate (roughly 3–5, not maxed)."},
+      {label:"Cooldown", seconds:300, detail:"Easy spin."}
+    ]
+  },
+  leanLegGrinder: {
+    key:"leanLegGrinder", name:"Lean-Leg Grinder", intensity:"moderate",
+    tagline:"4 rounds, building heat each time through.",
+    rounds:4,
+    roundBlocks:[
+      {label:"Moderate", seconds:180, detail:"Steady, controlled pace."},
+      {label:"Heavy resistance / slower cadence", seconds:60, detail:"Increase resistance, drive forcefully through the pedals ~55–65 RPM."},
+      {label:"Hard acceleration", seconds:30, detail:"Push the pace hard."},
+      {label:"Easy", seconds:90, detail:"Recover before the next round."}
+    ]
+  },
+  conditioningBuilder: {
+    key:"conditioningBuilder", name:"The Conditioning Builder", intensity:"hard",
+    tagline:"Your nasty one. Don't sprint round 1 like a world record attempt — rounds 7–8 should still look like rounds 1–2."
+  }
+};
+
+/* Conditioning Builder's interval count/format progresses by how many times you've
+   actually done it -- not by calendar week, since bike days move around on purpose. */
+function conditioningBuilderPlan(completions){
+  completions = completions||0;
+  if(completions < 2) return {rounds:6, hard:45, easy:75, stage:"Early stage"};
+  if(completions < 4) return {rounds:7, hard:45, easy:75, stage:"Building"};
+  if(completions < 6) return {rounds:8, hard:45, easy:75, stage:"Near full progression"};
+  return {rounds:8, hard:60, easy:60, stage:"Full progression"};
+}
+
+function bikeIntensityFor(key){ return (BIKE_WORKOUTS[key] && BIKE_WORKOUTS[key].intensity) || "moderate"; }
+
+/* first not-yet-done bike workout this cycle, in rotation order -- what the Bike tab defaults to */
+function nextBikeWorkout(){
+  for(var i=0;i<BIKE_ROTATION.length;i++){ if(!state.bikeCycleCompleted[BIKE_ROTATION[i]]) return BIKE_ROTATION[i]; }
+  return null; /* all 3 done this cycle */
+}
+
+function logBikeWorkout(key){
+  var entry = {id:Date.now(), date:new Date().toISOString().slice(0,10), workoutKey:key, intensity:bikeIntensityFor(key)};
+  state.bikeHistory.push(entry);
+  state.bikeCycleCompleted[key] = true;
+  if(key==="conditioningBuilder") state.conditioningBuilderCompletions = (state.conditioningBuilderCompletions||0) + 1;
+  if(BIKE_ROTATION.every(function(k){ return state.bikeCycleCompleted[k]; })){
+    BIKE_ROTATION.forEach(function(k){ state.bikeCycleCompleted[k] = false; });
+  }
+  save();
+  return entry;
 }
 
 /* ---------------- state ---------------- */
@@ -583,7 +651,10 @@ function freshState(){
     lastPicked: {},
     warmupCycleCounter: 0,
     cyclesCompleted: 0,
-    deloadActive: false
+    deloadActive: false,
+    bikeCycleCompleted: {aerobicBase:false, conditioningBuilder:false, leanLegGrinder:false},
+    bikeHistory: [],
+    conditioningBuilderCompletions: 0
   };
 }
 
@@ -614,6 +685,10 @@ function normalizeState(){
   if(state.current && typeof state.current.warmupCycle !== "number") state.current.warmupCycle = 0;
   if(typeof state.cyclesCompleted !== "number") state.cyclesCompleted = 0;
   if(typeof state.deloadActive !== "boolean") state.deloadActive = false;
+  if(!state.bikeCycleCompleted) state.bikeCycleCompleted = {};
+  ["aerobicBase","conditioningBuilder","leanLegGrinder"].forEach(function(k){ if(typeof state.bikeCycleCompleted[k] !== "boolean") state.bikeCycleCompleted[k] = false; });
+  if(!Array.isArray(state.bikeHistory)) state.bikeHistory = [];
+  if(typeof state.conditioningBuilderCompletions !== "number") state.conditioningBuilderCompletions = 0;
   /* discard an in-progress session saved by an older version of this file (data shape changed) */
   if(state.current && !Array.isArray(state.current.groups)) state.current = null;
   if(state.current && typeof state.current.conditioningRating === "undefined") state.current.conditioningRating = null;
@@ -991,6 +1066,7 @@ function render(){
     if(!state.onboarded) renderOnboarding();
     else if(state.view==="today") renderToday();
     else if(state.view==="calendar") renderCalendar();
+    else if(state.view==="bike") renderBike();
     else if(state.view==="history") renderHistory();
     else if(state.view==="settings") renderSettings();
     else if(state.view==="summary") renderSummary();
@@ -1070,7 +1146,7 @@ function navHtml(){
   function b(view,label){
     return '<button class="navbtn'+(state.view===view?' active':'')+'" data-nav="'+view+'">'+label+'</button>';
   }
-  return '<div class="navbar">'+b('today','Today')+b('calendar','Calendar')+b('history','History')+b('settings','Settings')+'</div>';
+  return '<div class="navbar">'+b('today','Today')+b('calendar','Calendar')+b('bike','Bike')+b('history','History')+b('settings','Settings')+'</div>';
 }
 
 function wireNav(){
@@ -1548,6 +1624,119 @@ function renderCalendar(){
       discardCurrentSession();
       render();
     }
+  });
+}
+
+/* ---------------- bike screen ---------------- */
+function blocksForBikeWorkout(key){
+  if(key==="aerobicBase") return BIKE_WORKOUTS.aerobicBase.blocks.slice();
+  if(key==="leanLegGrinder"){
+    var out = [];
+    var w = BIKE_WORKOUTS.leanLegGrinder;
+    for(var r=1;r<=w.rounds;r++){
+      w.roundBlocks.forEach(function(b){ out.push({label:"Round "+r+" — "+b.label, seconds:b.seconds, detail:b.detail}); });
+    }
+    return out;
+  }
+  if(key==="conditioningBuilder"){
+    var plan = conditioningBuilderPlan(state.conditioningBuilderCompletions);
+    var blocks = [{label:"Warm-up", seconds:300, detail:"Easy, build gradually into it."}];
+    for(var i=1;i<=plan.rounds;i++){
+      blocks.push({label:"Round "+i+" — hard", seconds:plan.hard, detail:"RPE 8.5–9/10. Don't sprint round 1 like a world record attempt."});
+      blocks.push({label:"Round "+i+" — easy", seconds:plan.easy, detail:"Recover, don't fully stop."});
+    }
+    blocks.push({label:"Cooldown", seconds:240, detail:"3–5 min easy."});
+    return blocks;
+  }
+  return [];
+}
+
+function bikeBadge(intensity){
+  var cls = intensity==="hard" ? " warn" : "";
+  return '<span class="badge'+cls+'">'+(intensity==="easy"?"Easy":intensity==="hard"?"Hard":"Moderate")+'</span>';
+}
+
+function renderBike(){
+  var html = '<div class="topbar"><h1>Bike</h1><p class="muted">3 sessions a week, whatever days work — check them off as you go</p></div>';
+
+  var doneCount = BIKE_ROTATION.filter(function(k){ return state.bikeCycleCompleted[k]; }).length;
+  html += '<div class="card framedcard"><p class="exmeta">'+doneCount+' of 3 done this cycle'+(doneCount===0?'':'.')+'</p></div>';
+
+  BIKE_ROTATION.forEach(function(key){
+    var w = BIKE_WORKOUTS[key];
+    var done = !!state.bikeCycleCompleted[key];
+    var blocks = blocksForBikeWorkout(key);
+    var totalMin = Math.round(blocks.reduce(function(s,b){ return s+b.seconds; },0)/60);
+    var expanded = expandedBikeKey===key;
+
+    if(key==="conditioningBuilder"){
+      var hardWarn = hardDayYesterday();
+      if(hardWarn && !done){
+        html += '<div class="card framedcard warnframe"><p class="exmeta">Yesterday was a hard day ('+(hardWarn.kind==="bike"?'bike — ':'')+'<b>'+hardWarn.label+'</b>) and this one is hard too. Nothing\'s stopping you, but worth weighing Aerobic Base or Lean-Leg Grinder instead if you have the flexibility.</p></div>';
+      }
+    }
+
+    html += '<div class="card framedcard'+(done?'':' warnframe')+'">';
+    html += '<div class="row"><h2>'+w.name+'</h2>'+bikeBadge(w.intensity)+'</div>';
+    html += '<p class="exmeta">'+w.tagline+'</p>';
+    html += '<p class="exmeta">~'+totalMin+' min'+(done?' · done this cycle':'')+'</p>';
+    if(key==="conditioningBuilder"){
+      var plan = conditioningBuilderPlan(state.conditioningBuilderCompletions);
+      html += '<p class="exmeta">'+plan.stage+' — '+plan.rounds+' rounds, '+plan.hard+'s hard / '+plan.easy+'s easy. Completed '+state.conditioningBuilderCompletions+' time'+(state.conditioningBuilderCompletions===1?'':'s')+' so far.</p>';
+    }
+    html += '<a class="link" href="#" data-bike-toggle="'+key+'" style="display:inline-block;margin-top:6px;">'+(expanded?'Hide structure':'View structure')+' →</a>';
+
+    if(expanded){
+      blocks.forEach(function(b, bi){
+        var outId = 'bike-'+key+'-'+bi;
+        html += '<div style="margin-top:10px;"><div class="exname" style="font-size:14px;">'+b.label+'</div>';
+        html += '<p class="exmeta">'+b.detail+'</p>';
+        html += '<button class="timerbtn" data-rest="'+b.seconds+'" data-out="'+outId+'">Start — <span style="text-transform:lowercase;">'+b.seconds+'s</span></button>';
+        html += '<div class="muted" id="'+outId+'" style="text-align:center;margin-top:4px;"></div></div>';
+      });
+    }
+
+    if(!done){
+      html += '<button class="primary" style="width:100%;margin-top:12px;" data-bike-complete="'+key+'">Mark '+w.name+' complete</button>';
+    }
+    html += '</div>';
+  });
+
+  html += '<div style="height:70px;"></div>';
+  html += navHtml();
+  app.innerHTML = html;
+  wireNav();
+
+  app.querySelectorAll('[data-bike-toggle]').forEach(function(link){
+    link.addEventListener('click', function(e){
+      if(e && e.preventDefault) e.preventDefault();
+      var key = link.getAttribute('data-bike-toggle');
+      expandedBikeKey = expandedBikeKey===key ? null : key;
+      render();
+    });
+  });
+
+  app.querySelectorAll('[data-bike-complete]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      logBikeWorkout(btn.getAttribute('data-bike-complete'));
+      expandedBikeKey = null;
+      render();
+    });
+  });
+
+  app.querySelectorAll('[data-rest]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var seconds = +btn.getAttribute('data-rest');
+      var out = document.getElementById(btn.getAttribute('data-out'));
+      btn.disabled = true;
+      var remaining = seconds;
+      out.textContent = remaining+'s remaining';
+      var iv = setInterval(function(){
+        remaining--;
+        if(remaining<=0){ clearInterval(iv); out.textContent = 'Done.'; btn.disabled=false; }
+        else out.textContent = remaining+'s remaining';
+      },1000);
+    });
   });
 }
 
