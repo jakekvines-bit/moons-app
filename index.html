@@ -514,23 +514,44 @@ function stretchHtml(buckets, cycle){
 }
 
 var TEMPLATES = {
-  A: {label:"Full body I — squat & push", cond:"A", slots:[
+  A: {label:"Full body I — squat & push", family:"THE FOUNDATION", intensity:"moderate", cond:"A", slots:[
     {type:"single", pattern:"squat", role:"main"},
     {type:"superset", restBetween:15, restAfterRound:90, parts:[{pattern:"horizontalPushFlat", role:"main"},{pattern:"horizontalPull", role:"main"}]},
     {type:"superset", restBetween:15, restAfterRound:60, parts:[{pattern:"horizontalPull", role:"finisher"},{pattern:"core", role:"finisher"}]}
   ]},
-  B: {label:"Full body II — hinge & pull", cond:"B", slots:[
+  B: {label:"Full body II — hinge & pull", family:"THE ENGINE", intensity:"hard", cond:"B", slots:[
     {type:"single", pattern:"hinge", role:"main"},
     {type:"superset", restBetween:15, restAfterRound:90, parts:[{pattern:"verticalPull", role:"main"},{pattern:"verticalPush", role:"main"}]},
     {type:"superset", restBetween:15, restAfterRound:60, parts:[{pattern:"hinge", role:"accessory"},{pattern:"core", role:"finisher"}]}
   ]},
-  C: {label:"Full body III — unilateral & upper volume", cond:"C", slots:[
+  C: {label:"Full body III — unilateral & upper volume", family:"THE FORGE", intensity:"moderate", cond:"C", slots:[
     {type:"single", pattern:"squat", role:"main"},
     {type:"superset", restBetween:15, restAfterRound:90, parts:[{pattern:"horizontalPushIncline", role:"main"},{pattern:"horizontalPull", role:"accessory"}]},
     {type:"superset", restBetween:15, restAfterRound:60, parts:[{pattern:"verticalPush", role:"finisher"},{pattern:"core", role:"finisher"}]}
   ]}
 };
 var ROTATION = ["A","B","C"];
+
+/* ---------------- house rules: intensity + periodization ---------------- */
+function intensityFor(dayKey){
+  if(dayKey==="D") return "hard"; /* bonus day stacks on top of an already-complete week */
+  return (TEMPLATES[dayKey] && TEMPLATES[dayKey].intensity) || "moderate";
+}
+function isoDateOffset(daysAgo){
+  var d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().slice(0,10);
+}
+/* was there a hard-intensity day logged yesterday? -- used to softly steer away
+   from stacking two hard days back to back, never to block it outright */
+function hardDayYesterday(){
+  var y = isoDateOffset(1);
+  for(var i=0;i<state.history.length;i++){
+    var h = state.history[i];
+    if(h.date===y && intensityFor(h.dayKey)==="hard") return h;
+  }
+  return null;
+}
 
 /* ---------------- state ---------------- */
 var DEFAULT_PROFILE = {
@@ -560,7 +581,9 @@ function freshState(){
     conditioningStreak: {direction:null, count:0},
     cycleCompleted: {A:false, B:false, C:false},
     lastPicked: {},
-    warmupCycleCounter: 0
+    warmupCycleCounter: 0,
+    cyclesCompleted: 0,
+    deloadActive: false
   };
 }
 
@@ -589,6 +612,8 @@ function normalizeState(){
   if(!state.lastPicked || typeof state.lastPicked !== "object") state.lastPicked = {};
   if(typeof state.warmupCycleCounter !== "number") state.warmupCycleCounter = 0;
   if(state.current && typeof state.current.warmupCycle !== "number") state.current.warmupCycle = 0;
+  if(typeof state.cyclesCompleted !== "number") state.cyclesCompleted = 0;
+  if(typeof state.deloadActive !== "boolean") state.deloadActive = false;
   /* discard an in-progress session saved by an older version of this file (data shape changed) */
   if(state.current && !Array.isArray(state.current.groups)) state.current = null;
   if(state.current && typeof state.current.conditioningRating === "undefined") state.current.conditioningRating = null;
@@ -754,7 +779,7 @@ function buildBonusDay(){
   else if(lower <= upper){ parts=[{pattern:"squat",role:"accessory"},{pattern:"hinge",role:"accessory"},{pattern:"hinge",role:"finisher"}]; label="Bonus day — lower body focus + mobility"; }
   else if(counts.upperPush <= counts.upperPull){ parts=[{pattern:"verticalPush",role:"main"},{pattern:"horizontalPushFlat",role:"accessory"},{pattern:"horizontalPushFlat",role:"finisher"}]; label="Bonus day — upper push focus + mobility"; }
   else { parts=[{pattern:"verticalPull",role:"accessory"},{pattern:"verticalPull",role:"finisher"},{pattern:"horizontalPull",role:"finisher"}]; label="Bonus day — upper pull focus + mobility"; }
-  return {label:label, cond:"D", isBonus:true, slots:[
+  return {label:label, family:"WEAK POINT", intensity:"hard", cond:"D", isBonus:true, slots:[
     {type:"single", pattern:parts[0].pattern, role:parts[0].role},
     {type:"superset", restBetween:15, restAfterRound:75, parts:[parts[1], parts[2]]}
   ]};
@@ -765,8 +790,11 @@ function buildSessionExercise(pattern, role, usedIds, avoidId){
   var exId = pickForSlot(pattern, role, state.profile, usedIds, avoidId);
   usedIds.push(exId);
   var ex = EX[exId], p = getProgress(exId);
+  var setCount = ex.sets;
+  /* deload cycle: trim a set off the main lifts, leave lighter accessory/finisher work alone */
+  if(state.deloadActive && role==="main" && setCount>2) setCount = setCount-1;
   var sets = [];
-  for(var i=0;i<ex.sets;i++) sets.push({reps:p.repTarget, weight:p.weight, done:false});
+  for(var i=0;i<setCount;i++) sets.push({reps:p.repTarget, weight:p.weight, done:false});
   return {exId:exId, targetWeight:p.weight, targetReps:p.repTarget, sets:sets};
 }
 
@@ -825,7 +853,8 @@ function startSession(dayKey){
   var condId = pickConditioning(tpl.cond, state.profile);
   var warmupCycle = state.warmupCycleCounter||0;
   state.warmupCycleCounter = warmupCycle + 1;
-  state.current = {dayKey:dayKey, label:tpl.label, cond:tpl.cond, condId:condId, conditioningTierUsed:state.conditioningTier, conditioningRating:null, groups:groups, isBonus:!!tpl.isBonus, startedAt:Date.now(), warmupCycle:warmupCycle};
+  var tierUsed = state.deloadActive ? Math.min(state.conditioningTier, 0) : state.conditioningTier;
+  state.current = {dayKey:dayKey, label:tpl.label, family:tpl.family, cond:tpl.cond, condId:condId, conditioningTierUsed:tierUsed, conditioningRating:null, groups:groups, isBonus:!!tpl.isBonus, startedAt:Date.now(), warmupCycle:warmupCycle, deload:!!state.deloadActive};
   save();
   return true;
 }
@@ -880,6 +909,11 @@ function finishSession(){
     state.cycleCompleted[cur.dayKey] = true;
     if(ROTATION.every(function(k){ return state.cycleCompleted[k]; })){
       ROTATION.forEach(function(k){ state.cycleCompleted[k] = false; });
+      var justFinishedDeload = !!state.deloadActive;
+      state.cyclesCompleted = (state.cyclesCompleted||0) + 1;
+      /* every 5 completed cycles, the next one is a lighter deload cycle --
+         reduced main-lift sets + capped conditioning, see buildSessionExercise/startSession */
+      state.deloadActive = !justFinishedDeload && (state.cyclesCompleted % 5 === 0);
     }
   }
   state.current = null;
@@ -1175,7 +1209,15 @@ function renderToday(){
   if(!state.current){
     var nextKey = nextCycleDay();
     var tpl = TEMPLATES[nextKey];
+    if(state.deloadActive){
+      html += '<div class="card framedcard warnframe"><p class="exmeta"><b>Deload cycle</b> — you\'ve earned a lighter week. Main lifts trim a set and conditioning eases off automatically this cycle, so intensity picks back up fresh next time.</p></div>';
+    }
+    var hardWarn = intensityFor(nextKey)==="hard" ? hardDayYesterday() : null;
+    if(hardWarn){
+      html += '<div class="card framedcard warnframe"><p class="exmeta">Yesterday was a hard day (<b>'+hardWarn.label+'</b>) and today\'s up is hard too. Nothing\'s stopping you, but if you have the flexibility, hitting the <a class="link" href="#" data-nav="calendar">Calendar</a> for a moderate day instead gives you a bit more recovery.</p></div>';
+    }
     html += '<div class="card framedcard">';
+    html += '<p class="exmeta" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">'+tpl.family+'</p>';
     html += '<div class="row"><h2>'+tpl.label+'</h2><span class="badge">Day '+nextKey+'</span></div>';
     html += '<p class="exmeta">'+previewNames(tpl).join(' · ')+'</p>';
     var previewCondId = pickConditioning(tpl.cond, state.profile);
@@ -1187,7 +1229,12 @@ function renderToday(){
     html += '<p class="muted" style="margin-top:10px;">Want a different day, or to go back and finish one you skipped? Check the <a class="link" href="#" data-nav="calendar">Calendar</a> tab.</p>';
   } else {
     var cur = state.current;
-    html += '<div class="card framedcard'+(cur.isBonus?' warnframe':'')+'"><div class="row"><h2>'+cur.label+'</h2><span class="badge'+(cur.isBonus?' warn':'')+'">'+(cur.isBonus?'Bonus':'Day '+cur.dayKey)+'</span></div></div>';
+    if(cur.deload){
+      html += '<div class="card framedcard warnframe"><p class="exmeta"><b>Deload cycle</b> — sets and conditioning are trimmed back today on purpose.</p></div>';
+    }
+    html += '<div class="card framedcard'+(cur.isBonus?' warnframe':'')+'">';
+    if(cur.family) html += '<p class="exmeta" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">'+cur.family+'</p>';
+    html += '<div class="row"><h2>'+cur.label+'</h2><span class="badge'+(cur.isBonus?' warn':'')+'">'+(cur.isBonus?'Bonus':'Day '+cur.dayKey)+'</span></div></div>';
 
     var curExIds = flattenGroups(cur.groups).map(function(e){ return e.exId; });
     var curBuckets = bucketsForExIds(curExIds);
@@ -1198,7 +1245,7 @@ function renderToday(){
       var block = pairLabel
         ? '<div style="display:flex;gap:8px;align-items:center;margin-bottom:2px;"><span class="pairbadge">'+pairLabel+'</span><div class="exname">'+ex.name+'</div></div>'
         : '<div class="exname">'+ex.name+'</div>';
-      block += '<div class="exmeta">'+ex.equipLabel+' · target '+(ex.hasWeight? e.targetWeight+' lb x ':'')+e.targetReps+(ex.isTime?'s':' reps')+(ex.perSide?' /side':'')+' · '+ex.sets+' sets</div>';
+      block += '<div class="exmeta">'+ex.equipLabel+' · target '+(ex.hasWeight? e.targetWeight+' lb x ':'')+e.targetReps+(ex.isTime?'s':' reps')+(ex.perSide?' /side':'')+' · '+e.sets.length+' sets</div>';
       if(ex.tempo) block += '<div class="exmeta">Tempo '+ex.tempo+' (down–pause–up)</div>';
       if(ex.note) block += '<div class="exmeta">'+ex.note+'</div>';
       block += '<div style="margin-top:4px;"><a class="link" href="'+correctFormUrl(ex)+'" target="_blank" rel="noopener">Correct form</a></div>';
@@ -1375,7 +1422,14 @@ function renderDayPreview(dayKey){
   var previewBuckets = bucketsForTemplate(tpl);
   var previewCycle = state.warmupCycleCounter||0;
 
-  var html = '<div class="topbar"><h1>'+tpl.label+'</h1><p class="muted">Preview — nothing is logged until you start it</p></div>';
+  var html = '<div class="topbar"><h1>'+tpl.label+'</h1><p class="muted">'+tpl.family+' · Preview — nothing is logged until you start it</p></div>';
+  if(state.deloadActive){
+    html += '<div class="card framedcard warnframe"><p class="exmeta"><b>Deload cycle</b> — main lifts trim a set and conditioning eases off automatically this cycle.</p></div>';
+  }
+  var previewHardWarn = intensityFor(dayKey)==="hard" ? hardDayYesterday() : null;
+  if(previewHardWarn){
+    html += '<div class="card framedcard warnframe"><p class="exmeta">Yesterday was a hard day (<b>'+previewHardWarn.label+'</b>) and this one is hard too. Worth weighing a moderate day instead if you have the flexibility.</p></div>';
+  }
   html += warmupHtml(previewBuckets, previewCycle);
 
   function previewBlock(e, pairLabel){
@@ -1383,7 +1437,7 @@ function renderDayPreview(dayKey){
     var block = pairLabel
       ? '<div style="display:flex;gap:8px;align-items:center;margin-bottom:2px;"><span class="pairbadge">'+pairLabel+'</span><div class="exname">'+ex.name+'</div></div>'
       : '<div class="exname">'+ex.name+'</div>';
-    block += '<div class="exmeta">'+ex.equipLabel+' · target '+(ex.hasWeight? e.targetWeight+' lb x ':'')+e.targetReps+(ex.isTime?'s':' reps')+(ex.perSide?' /side':'')+' · '+ex.sets+' sets</div>';
+    block += '<div class="exmeta">'+ex.equipLabel+' · target '+(ex.hasWeight? e.targetWeight+' lb x ':'')+e.targetReps+(ex.isTime?'s':' reps')+(ex.perSide?' /side':'')+' · '+e.sets.length+' sets</div>';
     if(ex.tempo) block += '<div class="exmeta">Tempo '+ex.tempo+' (down–pause–up)</div>';
     if(ex.note) block += '<div class="exmeta">'+ex.note+'</div>';
     block += '<div style="margin-top:4px;"><a class="link" href="'+correctFormUrl(ex)+'" target="_blank" rel="noopener">Correct form</a></div>';
@@ -1443,10 +1497,15 @@ function renderCalendar(){
     html += '<button style="width:100%;margin-top:8px;" id="discardSessionBtn">Discard it instead (nothing gets logged)</button></div>';
   }
 
+  if(state.deloadActive){
+    html += '<div class="card framedcard warnframe"><p class="exmeta"><b>Deload cycle</b> — main lifts trim a set and conditioning eases off automatically across this whole cycle.</p></div>';
+  }
+
   ROTATION.forEach(function(dayKey){
     var tpl = TEMPLATES[dayKey];
     var done = !!state.cycleCompleted[dayKey];
     html += '<div class="card framedcard'+(done?'':' warnframe')+'">';
+    html += '<p class="exmeta" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">'+tpl.family+'</p>';
     html += '<div class="row"><h2>'+tpl.label+'</h2><span class="badge'+(done?'':' warn')+'">'+(done?'Done':'Day '+dayKey)+'</span></div>';
     html += '<p class="exmeta">'+previewNames(tpl).join(' · ')+'</p>';
     html += '<a class="link" href="#" data-view="'+dayKey+'" style="display:inline-block;margin-top:6px;">View full workout →</a>';
@@ -1455,6 +1514,7 @@ function renderCalendar(){
   });
 
   html += '<div class="card framedcard">';
+  html += '<p class="exmeta" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;">WEAK POINT</p>';
   html += '<div class="row"><h2>Bonus day</h2><span class="badge">Optional</span></div>';
   html += '<p class="exmeta">Adapts to whatever\'s been undertrained in your last few sessions.</p>';
   html += '<a class="link" href="#" data-view="D" style="display:inline-block;margin-top:6px;">View full workout →</a>';
